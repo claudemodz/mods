@@ -1,0 +1,19 @@
+{
+  "name": "ci-pane",
+  "displayName": "CI Pane",
+  "version": "0.1.0",
+  "description": "Live pull request checks beside the transcript: pass/fail per check, re-run failed jobs, open the PR. A status line appears only while something is failing. Uses the GitHub CLI.",
+  "author": { "name": "claudemodz", "url": "https://claudemodz.com" },
+  "license": "MIT",
+  "repository": "https://github.com/claudemodz/mods",
+  "keywords": ["github", "ci", "pull-requests", "pane"],
+  "userConfig": {
+    "pollSeconds": {
+      "type": "number",
+      "title": "Refresh interval (seconds)",
+      "description": "How often to ask GitHub for check status. Minimum 10.",
+      "required": false,
+      "default": 30
+    }
+  }
+}
