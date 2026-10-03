@@ -26,6 +26,17 @@
         "cost",
         "subagents"
       ]
+    },
+    {
+      "name": "ci-pane",
+      "source": "./plugins/ci-pane",
+      "description": "Live PR checks beside the transcript, with re-run and open buttons.",
+      "category": "git-ci",
+      "tags": [
+        "github",
+        "ci",
+        "pane"
+      ]
     }
   ]
 }
