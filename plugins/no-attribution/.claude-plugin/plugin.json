@@ -1,0 +1,26 @@
+{
+  "name": "no-attribution",
+  "displayName": "No Attribution",
+  "version": "0.1.0",
+  "description": "Removes the Co-Authored-By commit trailer and the \"Generated with Claude Code\" PR footer, or replaces them with your own text. Deterministic — no CLAUDE.md rule needed.",
+  "author": { "name": "claudemodz", "url": "https://claudemodz.com" },
+  "license": "MIT",
+  "repository": "https://github.com/claudemodz/mods",
+  "keywords": ["git", "commits", "pull-requests", "attribution"],
+  "userConfig": {
+    "commitText": {
+      "type": "string",
+      "title": "Commit trailer",
+      "description": "Text Claude adds to commit messages instead of the Co-Authored-By trailer. Leave empty to add nothing.",
+      "required": false,
+      "default": ""
+    },
+    "prText": {
+      "type": "string",
+      "title": "Pull request footer",
+      "description": "Text Claude adds to pull request descriptions instead of the \"Generated with Claude Code\" line. Leave empty to add nothing.",
+      "required": false,
+      "default": ""
+    }
+  }
+}
