@@ -1,0 +1,4 @@
+{
+  "description": "prompt.submit and tool.call (Edit/Write/NotebookEdit) collect each main-loop turn's prompt and edited files; turn.complete appends a record to $.store; /standup summarizes a range with $.model.complete.",
+  "modules": ["./register.ts"]
+}
