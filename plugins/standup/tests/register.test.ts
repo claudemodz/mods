@@ -18,6 +18,17 @@ const ANSWERED: TurnCompleteInput = {
   reason: 'answer',
 }
 
+/** An in-memory $.store the test can read back: the plugin's gets and sets land in `saved`. */
+function storeOf(on: On, initial: Record<string, unknown> = {}): Record<string, unknown> {
+  const saved: Record<string, unknown> = { ...initial }
+  on('store.get', ($, e) => ({ value: saved[e.key] }))
+  on('store.set', ($, e) => {
+    saved[e.key] = e.value
+    return { value: undefined }
+  })
+  return saved
+}
+
 function sessionOf(on: On, head: string | null): { prompts: string[] } {
   const prompts: string[] = []
   mock.clock(on, { now: NOW })
@@ -40,49 +51,49 @@ function sessionOf(on: On, head: string | null): { prompts: string[] } {
 
 describe('register', () => {
   test('a finished turn is recorded with prompt, branch and edited files', async ($, on) => {
-    mock.store(on)
+    const saved = storeOf(on)
     sessionOf(on, 'ref: refs/heads/feature/login\n')
     await $.session.start(SESSION)
 
-    await $.prompt.submit({ text: 'Add login rate limiting', wait: false })
+    await $.prompt.submit({ text: 'Add login rate limiting', wait: false, origin: { kind: 'composer' } })
     await $.tool.call({ tool: 'Edit', file_path: '/work/app/src/login.ts', old_string: 'a', new_string: 'b' })
     await $.turn.complete(ANSWERED)
 
-    const stored = (await $.store.get('records')) as WorkRecord[]
+    const stored = saved.records as WorkRecord[]
     expect(stored).toEqual([
       { at: NOW, repo: 'app', branch: 'feature/login', prompt: 'Add login rate limiting', files: ['src/login.ts'] },
     ])
   })
 
   test('a worktree (unreadable .git/HEAD) still records, as branch unknown', async ($, on) => {
-    mock.store(on)
+    const saved = storeOf(on)
     sessionOf(on, null)
     await $.session.start(SESSION)
 
-    await $.prompt.submit({ text: 'Refactor', wait: false })
+    await $.prompt.submit({ text: 'Refactor', wait: false, origin: { kind: 'composer' } })
     await $.turn.complete(ANSWERED)
 
-    const stored = (await $.store.get('records')) as WorkRecord[]
+    const stored = saved.records as WorkRecord[]
     expect(stored[0]?.branch).toBe('unknown')
   })
 
   test('long prompts are cut to 200 characters; slash commands are not recorded', async ($, on) => {
-    mock.store(on)
+    const saved = storeOf(on)
     sessionOf(on, 'ref: refs/heads/main\n')
     await $.session.start(SESSION)
 
-    await $.prompt.submit({ text: '/standup', wait: false })
+    await $.prompt.submit({ text: '/standup', wait: false, origin: { kind: 'composer' } })
     await $.turn.complete(ANSWERED)
-    await $.prompt.submit({ text: 'x'.repeat(500), wait: false })
+    await $.prompt.submit({ text: 'x'.repeat(500), wait: false, origin: { kind: 'composer' } })
     await $.turn.complete(ANSWERED)
 
-    const stored = (await $.store.get('records')) as WorkRecord[]
+    const stored = saved.records as WorkRecord[]
     expect(stored.length).toBe(1)
     expect(stored[0]?.prompt.length).toBe(200)
   })
 
   test('/standup summarizes today with the model', async ($, on) => {
-    mock.store(on, {
+    storeOf(on, {
       records: [{ at: NOW - 3_600_000, repo: 'app', branch: 'main', prompt: 'Add rate limiting', files: [] }],
     })
     const { prompts } = sessionOf(on, null)
@@ -93,7 +104,7 @@ describe('register', () => {
   })
 
   test('/standup with nothing recorded, or corrupt store data, says so without a model call', async ($, on) => {
-    mock.store(on, { records: 'not-a-list' })
+    storeOf(on, { records: 'not-a-list' })
     const { prompts } = sessionOf(on, null)
     await $.session.start(SESSION)
 
@@ -102,7 +113,7 @@ describe('register', () => {
   })
 
   test('/standup with a bad range prints usage', async ($, on) => {
-    mock.store(on)
+    const saved = storeOf(on)
     sessionOf(on, null)
     await $.session.start(SESSION)
     expect(await $.command.run(standup('month'))).toEqual({ text: 'Usage: /standup [today|yesterday|week]' })
