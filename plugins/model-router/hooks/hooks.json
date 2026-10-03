@@ -1,0 +1,4 @@
+{
+  "description": "agent.spawn routes mapped subagent types to configured models; /router sets a main-session preset applied on turn.step; ui.render on Spinner shows the preset's model.",
+  "modules": ["./register.ts"]
+}

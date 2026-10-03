@@ -1,0 +1,33 @@
+{
+  "name": "model-router",
+  "displayName": "Model Router",
+  "version": "0.1.0",
+  "description": "Runs chosen subagent types on cheaper models (Explore on Haiku by default) and adds /router to switch the main session between fast, smart and unchanged. Shows the active model beside the spinner.",
+  "author": { "name": "claudemodz", "url": "https://claudemodz.com" },
+  "license": "MIT",
+  "repository": "https://github.com/claudemodz/mods",
+  "keywords": ["models", "cost", "subagents"],
+  "userConfig": {
+    "subagentModels": {
+      "type": "string",
+      "title": "Subagent models",
+      "description": "Comma-separated agentType=model pairs, e.g. Explore=haiku,Plan=sonnet. A model Claude picks explicitly, and forks, are never changed.",
+      "required": false,
+      "default": "Explore=haiku"
+    },
+    "fastModel": {
+      "type": "string",
+      "title": "Fast preset model",
+      "description": "Main-session model for /router fast.",
+      "required": false,
+      "default": "sonnet"
+    },
+    "smartModel": {
+      "type": "string",
+      "title": "Smart preset model",
+      "description": "Main-session model for /router smart.",
+      "required": false,
+      "default": "opus"
+    }
+  }
+}
