@@ -15,6 +15,17 @@
         "git",
         "attribution"
       ]
+    },
+    {
+      "name": "model-router",
+      "source": "./plugins/model-router",
+      "description": "Routes subagents to cheaper models and adds /router presets for the main session.",
+      "category": "models-cost",
+      "tags": [
+        "models",
+        "cost",
+        "subagents"
+      ]
     }
   ]
 }
