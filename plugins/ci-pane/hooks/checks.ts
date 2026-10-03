@@ -78,8 +78,15 @@ export function errorStatus(exitCode: number, stderr: string): PrStatus {
   if (/no pull requests found/i.test(stderr) || /not a git repository/i.test(stderr)) {
     return { kind: 'no-pr' }
   }
+  if (exitCode === 4 || /gh auth login|HTTP 401/i.test(stderr)) return { kind: 'no-gh' }
   const first = stderr.trim().split('\n')[0] ?? ''
   return { kind: 'error', message: first || `gh exited with ${exitCode}` }
+}
+
+/** The state for a `gh` run that could not finish: gh missing, or a timeout or refusal. */
+export function rejectionStatus(message: string): PrStatus {
+  if (/ENOENT|EACCES|no such file|command not found/i.test(message)) return { kind: 'no-gh' }
+  return { kind: 'error', message: `gh did not finish: ${message}` }
 }
 
 export function tally(checks: readonly Check[]): Tally {

@@ -66,6 +66,21 @@ export function branchFromHead(head: string): string {
   return /^[0-9a-f]{40}\s*$/.test(head) ? 'detached' : 'unknown'
 }
 
+/** A directory and each of its parents, nearest first, ending at `/`. */
+export function parentsOf(path: string): string[] {
+  const parts = path.split('/').filter(Boolean)
+  const dirs: string[] = []
+  for (let i = parts.length; i > 0; i--) dirs.push('/' + parts.slice(0, i).join('/'))
+  return [...dirs, '/']
+}
+
+/** The git directory a worktree's `.git` file points at, or null when it isn't one. */
+export function gitdirOf(content: string, dir: string): string | null {
+  const target = content.match(/^gitdir:\s*(.+)$/m)?.[1]?.trim()
+  if (!target) return null
+  return target.startsWith('/') ? target : `${dir.replace(/\/+$/, '')}/${target}`
+}
+
 export function baseName(path: string): string {
   return path.replace(/\/+$/, '').split('/').pop() ?? path
 }
