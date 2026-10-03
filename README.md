@@ -10,5 +10,6 @@ Requires Claude Code 2.1.287 or later.
 
 | Mod | What it does |
 |---|---|
+| [no-attribution](plugins/no-attribution) | Removes Claude's commit trailer and PR footer, or replaces them with your text |
 
 Unofficial community project, not affiliated with Anthropic. Mods run with your permissions — read a mod's README and run `claude plugin validate plugins/<mod>` to see exactly what it can do.

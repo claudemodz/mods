@@ -1,6 +1,20 @@
 {
   "name": "claudemodz-mods",
-  "owner": { "name": "claudemodz", "url": "https://claudemodz.com" },
+  "owner": {
+    "name": "claudemodz",
+    "url": "https://claudemodz.com"
+  },
   "description": "Claude Code mods by the claudemodz maintainers. Browse more at claudemodz.com.",
-  "plugins": []
+  "plugins": [
+    {
+      "name": "no-attribution",
+      "source": "./plugins/no-attribution",
+      "description": "Removes the Co-Authored-By trailer and PR footer, or replaces them with your text.",
+      "category": "git-ci",
+      "tags": [
+        "git",
+        "attribution"
+      ]
+    }
+  ]
 }
