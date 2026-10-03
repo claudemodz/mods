@@ -4,6 +4,7 @@ import {
   errorStatus,
   failingRunIds,
   parsePrView,
+  rejectionStatus,
   summaryLine,
   tally,
   transitionOf,
@@ -48,6 +49,11 @@ describe('errorStatus', () => {
     expect(errorStatus(1, 'fatal: not a git repository (or any of the parent directories): .git')).toEqual({
       kind: 'no-pr',
     })
+  })
+
+  test('signed-out or expired gh is the sign-in state', async () => {
+    expect(errorStatus(4, 'To get started with GitHub CLI, please run:  gh auth login\n')).toEqual({ kind: 'no-gh' })
+    expect(errorStatus(1, 'HTTP 401: Bad credentials (https://api.github.com/graphql)')).toEqual({ kind: 'no-gh' })
   })
 
   test('other failures keep the first stderr line', async () => {
@@ -96,5 +102,18 @@ describe('failingRunIds', () => {
   test('lists each failing workflow run once', async () => {
     const status = parsePrView(PR_FAILING)
     expect(status.kind === 'pr' && failingRunIds(status.checks)).toEqual(['1002'])
+  })
+})
+
+describe('rejectionStatus', () => {
+  test('gh that cannot start is the install state', async () => {
+    expect(rejectionStatus('spawn gh ENOENT')).toEqual({ kind: 'no-gh' })
+  })
+
+  test('a timeout or other rejection is an error, not "install gh"', async () => {
+    expect(rejectionStatus('process timed out after 15000 ms')).toEqual({
+      kind: 'error',
+      message: 'gh did not finish: process timed out after 15000 ms',
+    })
   })
 })

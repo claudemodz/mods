@@ -4,7 +4,9 @@ import {
   addRecord,
   baseName,
   branchFromHead,
+  gitdirOf,
   isRange,
+  parentsOf,
   readRecords,
   recordsIn,
   relativeTo,
@@ -85,5 +87,18 @@ describe('standupPrompt', () => {
     expect(text).toContain('09:00 Add rate limiting — files: src/login.ts')
     expect(text).toContain('## docs (main)')
     expect(text).toContain('11:00 Fix typo')
+  })
+})
+
+describe('git paths', () => {
+  test('parentsOf lists a directory and each parent up to the root', async () => {
+    expect(parentsOf('/work/wt/src')).toEqual(['/work/wt/src', '/work/wt', '/work', '/'])
+    expect(parentsOf('/')).toEqual(['/'])
+  })
+
+  test('gitdirOf reads a worktree .git file, resolving relative paths', async () => {
+    expect(gitdirOf('gitdir: /work/app/.git/worktrees/wt\n', '/work/wt')).toBe('/work/app/.git/worktrees/wt')
+    expect(gitdirOf('gitdir: ../app/.git/worktrees/wt\n', '/work/wt')).toBe('/work/wt/../app/.git/worktrees/wt')
+    expect(gitdirOf('not a gitdir file', '/work/wt')).toBeNull()
   })
 })

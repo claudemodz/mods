@@ -30,6 +30,8 @@ type World = {
   exitCode: number
   stderr: string
   isGhMissing: boolean
+  rerunExit: number
+  rerunStderr: string
   runs: string[][]
   toasts: string[]
   statuses: (string | undefined)[]
@@ -43,6 +45,8 @@ function worldOf(on: On): World & { clock: ReturnType<typeof mock.clock> } {
     exitCode: 0,
     stderr: '',
     isGhMissing: false,
+    rerunExit: 0,
+    rerunStderr: '',
     runs: [],
     toasts: [],
     statuses: [],
@@ -55,7 +59,13 @@ function worldOf(on: On): World & { clock: ReturnType<typeof mock.clock> } {
     if (world.isGhMissing) return { deny: 'spawn gh ENOENT' }
     const isView = e.argv[1] === 'pr'
     return {
-      value: { exitCode: isView ? world.exitCode : 0, stdout: isView ? world.stdout : '', stderr: world.stderr },
+      value: {
+        exitCode: isView ? world.exitCode : world.rerunExit,
+        stdout: isView ? world.stdout : '',
+        stderr: isView ? world.stderr : world.rerunStderr,
+        isStdoutTruncated: false,
+        isStderrTruncated: false,
+      },
     }
   })
   on('ui.toast', ($, e) => {
@@ -68,7 +78,7 @@ function worldOf(on: On): World & { clock: ReturnType<typeof mock.clock> } {
   })
   on('ui.open', ($, e) => {
     world.opened.push(e.id)
-    return { value: undefined }
+    return { value: { isPlaced: true as const } }
   })
   return Object.assign(world, { clock: mock.clock(on) })
 }
@@ -132,4 +142,82 @@ describe('register', () => {
     })
     expect(world.toasts).toEqual([])
   })
+
+  test('a network blip between failing polls does not toast the failure again', async ($, on) => {
+    const world = worldOf(on)
+    world.stdout = PR_FAILING
+    await $.session.start(SESSION)
+    await world.clock.settle()
+
+    world.exitCode = 1
+    world.stderr = 'HTTP 502: Bad Gateway'
+    await world.clock.advance(30_000)
+    world.exitCode = 0
+    world.stderr = ''
+    await world.clock.advance(30_000)
+
+    expect(world.toasts).toEqual(['CI #42: 1 failing · 0 pending · 2 passing'])
+  })
+
+  test('going green after a blip still announces all checks passed', async ($, on) => {
+    const world = worldOf(on)
+    world.stdout = PR_FAILING
+    await $.session.start(SESSION)
+    await world.clock.settle()
+
+    world.exitCode = 1
+    world.stderr = 'HTTP 502: Bad Gateway'
+    await world.clock.advance(30_000)
+    world.exitCode = 0
+    world.stderr = ''
+    world.stdout = PR_PASSING
+    await world.clock.advance(30_000)
+
+    expect(world.toasts.at(-1)).toBe('CI #42: all checks passed')
+  })
+
+  test('signed-out gh shows the sign-in state', async ($, on) => {
+    const world = worldOf(on)
+    world.exitCode = 4
+    world.stderr = 'To get started with GitHub CLI, please run:  gh auth login'
+    await $.session.start(SESSION)
+    await world.clock.settle()
+
+    expect(await $.command.run(ciCommand())).toEqual({
+      text: 'CI: install and sign in to the GitHub CLI (gh) to see checks.',
+    })
+  })
+
+  test('/ci rerun reports when GitHub refuses the re-run', async ($, on) => {
+    const world = worldOf(on)
+    world.stdout = PR_FAILING
+    world.rerunExit = 1
+    world.rerunStderr = 'HTTP 403: Must have admin rights to Repository.'
+    await $.session.start(SESSION)
+    await world.clock.settle()
+
+    expect(await $.command.run(ciCommand('rerun'))).toEqual({
+      text: "Couldn't re-run 1 workflow run: HTTP 403: Must have admin rights to Repository.",
+    })
+  })
+
+  test('non-interactive sessions (claude -p, SDK) never poll', async ($, on) => {
+    const world = worldOf(on)
+    await $.session.start({ surface: null, isInteractive: false, cwd: '/work' })
+    await world.clock.settle()
+    await world.clock.advance(90_000)
+
+    expect(world.runs).toEqual([])
+  })
+
+  test('without gh, polling backs off instead of spawning gh every interval', async ($, on) => {
+    const world = worldOf(on)
+    world.isGhMissing = true
+    await $.session.start(SESSION)
+    await world.clock.settle()
+    await world.clock.advance(90_000)
+
+    expect(world.runs.length).toBe(1)
+  })
 })
+
