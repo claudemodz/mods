@@ -1,6 +1,52 @@
 {
   "name": "claudemodz-mods",
-  "owner": { "name": "claudemodz", "url": "https://claudemodz.com" },
+  "owner": {
+    "name": "claudemodz",
+    "url": "https://claudemodz.com"
+  },
   "description": "Claude Code mods by the claudemodz maintainers. Browse more at claudemodz.com.",
-  "plugins": []
+  "plugins": [
+    {
+      "name": "no-attribution",
+      "source": "./plugins/no-attribution",
+      "description": "Removes the Co-Authored-By trailer and PR footer, or replaces them with your text.",
+      "category": "git-ci",
+      "tags": [
+        "git",
+        "attribution"
+      ]
+    },
+    {
+      "name": "model-router",
+      "source": "./plugins/model-router",
+      "description": "Routes subagents to cheaper models and adds /router presets for the main session.",
+      "category": "models-cost",
+      "tags": [
+        "models",
+        "cost",
+        "subagents"
+      ]
+    },
+    {
+      "name": "ci-pane",
+      "source": "./plugins/ci-pane",
+      "description": "Live PR checks beside the transcript, with re-run and open buttons.",
+      "category": "git-ci",
+      "tags": [
+        "github",
+        "ci",
+        "pane"
+      ]
+    },
+    {
+      "name": "standup",
+      "source": "./plugins/standup",
+      "description": "Logs what you worked on across sessions and writes your standup with /standup.",
+      "category": "workflow",
+      "tags": [
+        "standup",
+        "productivity"
+      ]
+    }
+  ]
 }

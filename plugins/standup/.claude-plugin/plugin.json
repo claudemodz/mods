@@ -1,0 +1,26 @@
+{
+  "name": "standup",
+  "displayName": "Standup",
+  "version": "0.1.0",
+  "description": "Keeps a short log of what you asked Claude to do and which files changed, across sessions, and writes your standup update with /standup.",
+  "author": { "name": "claudemodz", "url": "https://claudemodz.com" },
+  "license": "MIT",
+  "repository": "https://github.com/claudemodz/mods",
+  "keywords": ["standup", "productivity", "log"],
+  "userConfig": {
+    "model": {
+      "type": "string",
+      "title": "Model",
+      "description": "Model that writes the standup (alias or full id).",
+      "required": false,
+      "default": "haiku"
+    },
+    "retentionDays": {
+      "type": "number",
+      "title": "Keep log for (days)",
+      "description": "Older log entries are dropped.",
+      "required": false,
+      "default": 14
+    }
+  }
+}

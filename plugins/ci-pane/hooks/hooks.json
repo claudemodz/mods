@@ -1,0 +1,4 @@
+{
+  "description": "session.start registers /ci and polls `gh pr view` on a timer; ui.render draws the CI pane; command.run opens it or re-runs failed jobs.",
+  "modules": ["./register.ts"]
+}

@@ -1,0 +1,4 @@
+{
+  "description": "attribution.text: replaces the commit trailer and PR footer with the configured text (empty by default); other attribution texts pass through.",
+  "modules": ["./register.ts"]
+}
