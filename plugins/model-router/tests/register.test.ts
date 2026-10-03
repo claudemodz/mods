@@ -43,6 +43,7 @@ describe('register', () => {
 
   test('/router fast reports the preset and main steps use the fast model', async ($, on) => {
     on('session.start', ($, e) => ({ cwd: e.cwd }))
+    on('command.register', ($, e) => ({ value: { command: e.name } }))
     const seen: string[] = []
     on('turn.step', async function* ($, e) {
       seen.push(e.model)
@@ -64,6 +65,7 @@ describe('register', () => {
 
   test('subagent steps keep their own model under a preset', async ($, on) => {
     on('session.start', ($, e) => ({ cwd: e.cwd }))
+    on('command.register', ($, e) => ({ value: { command: e.name } }))
     const seen: string[] = []
     on('turn.step', async function* ($, e) {
       seen.push(e.model)
@@ -82,6 +84,7 @@ describe('register', () => {
 
   test('an unknown argument prints usage', async ($, on) => {
     on('session.start', ($, e) => ({ cwd: e.cwd }))
+    on('command.register', ($, e) => ({ value: { command: e.name } }))
     await $.session.start(SESSION)
     expect(await $.command.run(routerCommand('turbo'))).toEqual({
       text: 'Usage: /router [fast|smart|off]',

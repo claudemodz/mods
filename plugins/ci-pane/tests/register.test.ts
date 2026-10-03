@@ -49,6 +49,7 @@ function worldOf(on: On): World & { clock: ReturnType<typeof mock.clock> } {
     opened: [],
   }
   on('session.start', ($, e) => ({ cwd: e.cwd }))
+  on('command.register', ($, e) => ({ value: { command: e.name } }))
   on('process.run', ($, e) => {
     world.runs.push([...e.argv])
     if (world.isGhMissing) return { deny: 'spawn gh ENOENT' }
