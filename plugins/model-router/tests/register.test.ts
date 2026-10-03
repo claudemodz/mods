@@ -1,7 +1,21 @@
-import type { CommandRunInput, TurnStepResult } from 'claude-code'
+import type { AgentSpawnInput, CommandRunInput } from 'claude-code'
 import { describe, expect, test } from 'claude-code/testing'
 
 const SESSION = { surface: 'terminal' as const, isInteractive: true, cwd: '/work' }
+
+function spawnOf(overrides: Partial<AgentSpawnInput>): AgentSpawnInput {
+  return {
+    tool_use_id: 'toolu_1',
+    prompt: 'find the loader',
+    description: 'Find loader',
+    subagentType: 'Explore',
+    provider: { plugin: 'engine', tier: 'core' },
+    parentModel: 'opus',
+    background: false,
+    fork: false,
+    ...overrides,
+  }
+}
 
 function routerCommand(args: string): CommandRunInput {
   return {
@@ -15,7 +29,7 @@ function routerCommand(args: string): CommandRunInput {
 describe('register', () => {
   test('Explore subagents run on haiku by default', async ($, on) => {
     on('agent.spawn', ($, e) => ({ model: e.model ?? 'inherit' }))
-    expect(await $.agent.spawn({ prompt: 'find the loader', subagentType: 'Explore' })).toEqual({
+    expect(await $.agent.spawn(spawnOf({}))).toEqual({
       model: 'haiku',
     })
   })
@@ -23,7 +37,7 @@ describe('register', () => {
   test('an explicit subagent model is kept', async ($, on) => {
     on('agent.spawn', ($, e) => ({ model: e.model ?? 'inherit' }))
     expect(
-      await $.agent.spawn({ prompt: 'find the loader', subagentType: 'Explore', model: 'opus' }),
+      await $.agent.spawn(spawnOf({ model: 'opus' })),
     ).toEqual({ model: 'opus' })
   })
 
@@ -32,7 +46,7 @@ describe('register', () => {
     const seen: string[] = []
     on('turn.step', async function* ($, e) {
       seen.push(e.model)
-      return { turnId: e.turnId, index: e.index, answer: '', toolUses: [], stopReason: null } as TurnStepResult
+      return { turnId: e.turnId, index: e.index, answer: '', toolUses: [], stopReason: null, usage: null }
     })
 
     await $.session.start(SESSION)
@@ -53,7 +67,7 @@ describe('register', () => {
     const seen: string[] = []
     on('turn.step', async function* ($, e) {
       seen.push(e.model)
-      return { turnId: e.turnId, index: e.index, answer: '', toolUses: [], stopReason: null } as TurnStepResult
+      return { turnId: e.turnId, index: e.index, answer: '', toolUses: [], stopReason: null, usage: null }
     })
 
     await $.session.start(SESSION)
