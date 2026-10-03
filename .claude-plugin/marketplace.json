@@ -37,6 +37,16 @@
         "ci",
         "pane"
       ]
+    },
+    {
+      "name": "standup",
+      "source": "./plugins/standup",
+      "description": "Logs what you worked on across sessions and writes your standup with /standup.",
+      "category": "workflow",
+      "tags": [
+        "standup",
+        "productivity"
+      ]
     }
   ]
 }
