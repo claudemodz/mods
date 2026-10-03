@@ -57,8 +57,8 @@ describe('errorStatus', () => {
   })
 
   test('other failures keep the first stderr line', async () => {
-    expect(errorStatus(4, 'HTTP 502: Bad Gateway\nretry later')).toEqual({ kind: 'error', message: 'HTTP 502: Bad Gateway' })
-    expect(errorStatus(4, '')).toEqual({ kind: 'error', message: 'gh exited with 4' })
+    expect(errorStatus(1, 'HTTP 502: Bad Gateway\nretry later')).toEqual({ kind: 'error', message: 'HTTP 502: Bad Gateway' })
+    expect(errorStatus(1, '')).toEqual({ kind: 'error', message: 'gh exited with 1' })
   })
 })
 
